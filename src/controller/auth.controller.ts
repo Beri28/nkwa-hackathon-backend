@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 import { PrismaClient } from '@prisma/client';
+import PersonalAccount from '../model/personalAccount.model';
 
 const Prisma=new PrismaClient()
  
@@ -44,15 +45,15 @@ export const Signup = async (req: Request, res: Response, next: NextFunction)=> 
             email,
             password: hashedPassword,
         });
-        // const newUser = await Prisma.user.create({
-        //     data:{
-        //     username,
-        //     email,
-        //     password: hashedPassword,
-        //     }
-        // });
+        const newPersonalAccount=await PersonalAccount.create({
+            userId:newUser._id
+        })
+        newUser.personalAccount=newPersonalAccount._id
+        let updatedNewUser= await User.findByIdAndUpdate(newUser._id,{
+            personalAccount:newPersonalAccount._id
+        }).populate('personalAccount')
 
-        console.log("User created successfully:", newUser);
+        console.log("User created successfully:", updatedNewUser);
 
         console.log("Generating JWT token...");
         const token = jwt.sign(
@@ -65,7 +66,7 @@ export const Signup = async (req: Request, res: Response, next: NextFunction)=> 
         res.status(201).json({
             success: true,
             message: `${username} created successfully`,
-            data: { token, user: newUser }
+            data: { token, user: updatedNewUser }
         });
 
     } catch (error:any) {

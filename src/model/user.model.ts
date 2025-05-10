@@ -20,21 +20,14 @@ const userSchema = new mongoose.Schema({
     required: true,
     minlength: 6,
   },
-  balance:{
-   type:Number 
+  personalAccount:{
+    type:mongoose.Schema.Types.ObjectId,
+    ref:'PersonalAccount'
   },
-  withdrawalsMade:[{
+  merchantAccount:{
     type:mongoose.Schema.Types.ObjectId,
-    ref:'Withdraw'
-  }],
-  paymentsMade:[{
-    type:mongoose.Schema.Types.ObjectId,
-    ref:'Payment'
-  }],
-  paymentsReceived:[{
-    type:mongoose.Schema.Types.ObjectId,
-    ref:'Payment'
-  }],
+    ref:'MerchantAccount'
+  },
 }, { timestamps: true });
 
 const User = mongoose.model('User', userSchema);

@@ -1,10 +1,14 @@
 import mongoose from 'mongoose';
 
 const withdrawSchema = new mongoose.Schema({
-  userId: {
+  receiverModel:{
+    type:String,
+    required:true,
+    enum:['MerchantAccount','PersonalAccount'],
+  },
+  receiver: {
     type: mongoose.Schema.Types.ObjectId,
-    ref:'User',
-    required: true,
+    refPath:'receiverModel', 
   },
   date:{
     type:Date,

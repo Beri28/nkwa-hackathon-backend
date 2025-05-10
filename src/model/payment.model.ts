@@ -1,15 +1,24 @@
 import mongoose from 'mongoose';
 
 const paymentSchema = new mongoose.Schema({
-  senderId: {
+  receiverModel:{
+    type:String,
+    required:true,
+    enum:['MerchantAccount','PersonalAccount'],
+  },
+  sender: {
     type: mongoose.Schema.Types.ObjectId,
-    ref:'User',
+    ref:'PersonalAccount',
     required: true,
   },
-  receiverId: {
+  receiver: {
     type: mongoose.Schema.Types.ObjectId,
-    ref:'User', 
-    required: true,
+    refPath:'receiverModel', 
+  },
+  date:{
+    type:Date,
+    default:new Date(Date.now()),
+    required:true
   },
   amount: {
     type: Number,
