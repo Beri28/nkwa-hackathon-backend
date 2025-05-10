@@ -1,4 +1,5 @@
 import { Pay } from "@nkwa-pay/sdk";
+import { Request, Response, NextFunction } from 'express';
 
 // const pay = new Pay({
 //     apiKeyAuth: process.env.API_KEY,
@@ -38,14 +39,18 @@ const collectPayment=async(amount:number,phoneNumber:number)=>{
     .catch(err => console.error(err));
 }
 
-const disburse=async(amount:number,phoneNumber:number)=>{
+export const disburse=async(req: Request, res: Response, next: NextFunction)=>{
+    const {phoneNumber,amount}=req.body
     const options = {
         method: 'POST',
         headers: {'X-API-Key': process.env.API_KEY || "", 'Content-Type': 'application/json'},
         body: `{"amount":${amount},"phoneNumber":${phoneNumber}`
     };
-    fetch('https://api.pay.staging.mynkwa.com/collect', options)
+    fetch('https://api.pay.staging.mynkwa.com/disburse', options)
     .then(response => response.json())
-    .then(response => console.log(response))
+    .then(response => {
+        console.log(response)
+        next()
+    })
     .catch(err => console.error(err));
 }

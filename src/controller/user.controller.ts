@@ -9,17 +9,17 @@ export const create=async(req: Request, res: Response)=>{
     try {
         console.log("Signup request received:", req.body);  // Log incoming request data
 
-        const { username, email, password } = req.body;
+        const { username, phoneNumber, password } = req.body;
 
         // Check if all required fields are provided
-        if (!email || !password) {
+        if (!phoneNumber || !password) {
             console.error("Signup failed: Missing required fields");
             res.json({ message: "All fields are required" });
             return
         }
 
         console.log("Checking if user already exists...");
-        const existingUser = await User.findOne({ email })
+        const existingUser = await User.findOne({ phoneNumber })
         if (existingUser) {
             console.warn("Signup failed: User already exists");
             res.status(400).json({ message: "User already exists" });
@@ -36,7 +36,7 @@ export const create=async(req: Request, res: Response)=>{
         console.log("Creating new user...");
         const newUser = await User.create({
             username,
-            email,
+            phoneNumber,
             password: hashedPassword,
         });
         const newPersonalAccount=await PersonalAccount.create({

@@ -12,17 +12,17 @@ export const Signup = async (req: Request, res: Response, next: NextFunction)=> 
     try {
         console.log("Signup request received:", req.body);  // Log incoming request data
 
-        const { username, email, password } = req.body;
+        const { username, phoneNumber, password } = req.body;
 
         // Check if all required fields are provided
-        if (!email || !password) {
+        if (!phoneNumber || !password) {
             console.error("Signup failed: Missing required fields");
             res.json({ message: "All fields are required" });
             return
         }
 
         console.log("Checking if user already exists...");
-        const existingUser = await User.findOne({ email })
+        const existingUser = await User.findOne({ phoneNumber })
         // const existingUser = await Prisma.user.findUnique({
         //     where:{email}
         // });
@@ -42,7 +42,7 @@ export const Signup = async (req: Request, res: Response, next: NextFunction)=> 
         console.log("Creating new user...");
         const newUser = await User.create({
             username,
-            email,
+            phoneNumber,
             password: hashedPassword,
         });
         const newPersonalAccount=await PersonalAccount.create({
@@ -51,7 +51,7 @@ export const Signup = async (req: Request, res: Response, next: NextFunction)=> 
         newUser.personalAccount=newPersonalAccount._id
         let updatedNewUser= await User.findByIdAndUpdate(newUser._id,{
             personalAccount:newPersonalAccount._id
-        }).populate('personalAccount')
+        },{new:true}).populate('personalAccount')
 
         console.log("User created successfully:", updatedNewUser);
 
@@ -77,8 +77,8 @@ export const Signup = async (req: Request, res: Response, next: NextFunction)=> 
 export const Login = async (req: Request, res: Response, next: NextFunction) => {
 // export const Login = async (req, res, next) => {
     try {
-        const { email, password } = req.body;
-        const user = await User.findOne({ email });
+        const { phoneNumber, password } = req.body;
+        const user = await User.findOne({ phoneNumber }).populate('personalAccount').populate('merchantAccount');
         // const user = await Prisma.user.findUnique({ where:{email} });
 
         if (!user) {
@@ -92,7 +92,7 @@ export const Login = async (req: Request, res: Response, next: NextFunction) => 
             return
         }
 
-        const token = jwt.sign({ id: user.email }, process.env.JWT_SECRET || '');
+        const token = jwt.sign({ id: user.phoneNumber }, process.env.JWT_SECRET || '');
 
         res.status(200).json({ success: true, message: `Welcome back ${user.username}`, data: { token, user } });
     } catch (error) {

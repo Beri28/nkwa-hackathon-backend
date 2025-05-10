@@ -3,7 +3,6 @@ import mongoose from 'mongoose';
 const paymentSchema = new mongoose.Schema({
   receiverModel:{
     type:String,
-    required:true,
     enum:['MerchantAccount','PersonalAccount'],
   },
   sender: {

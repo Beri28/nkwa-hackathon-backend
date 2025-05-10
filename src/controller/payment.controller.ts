@@ -84,6 +84,48 @@ export const TransferPersonal=async (req: Request, res: Response)=>{
     }
 }
 
+export const TransferMobile=async (req: Request, res: Response)=>{
+    try {
+        const {id,amount,paymentChannel,phoneNumber}=req.body
+        const options = {
+            method: 'POST',
+            headers: {'X-API-Key': process.env.API_KEY || "", 'Content-Type': 'application/json'},
+            body: `{"amount":${req.body.amount},"phoneNumber":${phoneNumber}}`
+        };
+        const personal=await PersonalAccount.findById(id)
+        if(personal && personal?.balance<amount) {
+            res.json({error:"Insufficient balance"})
+        }else{
+            fetch('https://api.pay.staging.mynkwa.com/disburse', options)
+            .then(response => response.json())
+            .then(async(response) =>{ 
+                console.log(response)
+                const transaction=await Payment.create({
+                    sender:id,
+                    amount,
+                    paymentChannel,
+                })
+                const senderUser=await PersonalAccount.findByIdAndUpdate(id,{
+                    $inc:{balance:-amount},
+                    $addToSet:{paymentsMade:transaction._id}
+                },{new:true})
+                const transaction2=await Payment.findByIdAndUpdate(transaction._id,{
+                    status:'success'
+                },{new:true})
+                res.json({transaction:transaction2, personalAccount:senderUser})
+            })
+            .catch(err => {
+                console.error(err) 
+                res.json({error:err})
+                // throw Error("Payment test failed")
+            });
+        }
+    } catch (error) {
+        console.log(error)
+        res.json({error})
+    }
+}
+
 export const TransferMerchant=async (req: Request, res: Response)=>{
     try {
         const {senderId,receiverId,amount,paymentChannel,status}=req.body
