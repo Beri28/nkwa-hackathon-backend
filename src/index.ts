@@ -21,9 +21,6 @@ app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use(express.static('src/frontend/public'))
-app.get('/', (req: Request, res: Response) => {
-  res.send('Welcome to Express & TypeScript Server');
-});
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/payment', paymentRouter);
